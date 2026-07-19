@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>病理组织诊断分类系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: "Microsoft YaHei", Arial, sans-serif;
+            background-color: #E3F2FD;
+            background-image: url('bg.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            z-index: -1;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-top: 80px;
+            margin-bottom: 100px;
+            position: relative;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 42px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            margin: 0;
+            font-size: 20px;
+            color: #555;
+        }
+        
+        .main-content {
+            display: flex;
+            gap: 40px;
+            margin-bottom: 80px;
+            align-items: stretch;
+        }
+        
+        .left-content {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: transparent;
+            border-radius: 12px;
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .carousel {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            height: 300px;
+            overflow: hidden;
+            border-radius: 10px;
+        }
+        
+        .carousel-images {
+            display: flex;
+            transition: transform 0.5s ease;
+            height: 100%;
+        }
+        
+        .carousel-item {
+            min-width: 100%;
+            height: 100%;
+            position: relative;
+        }
+        
+        .carousel-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        
+        .carousel-item:hover img {
+            transform: scale(1.1);
+        }
+        
+        .carousel-nav {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+        }
+        
+        .carousel-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .carousel-dot.active {
+            background: rgba(255, 255, 255, 1);
+            transform: scale(1.2);
+        }
+        
+        .right-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            background: transparent;
+            border-radius: 12px;
+            padding: 30px;
+        }
+        
+        .feature-card {
+            background: rgba(0, 0, 0, 0.4);
+            border: none;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            height: 300px;
+            overflow-y: auto;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+        }
+        
+        .feature-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .feature-icon {
+            font-size: 20px;
+            color: white;
+        }
+        
+        .feature-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: white;
+            margin: 0 0 15px 0;
+        }
+        
+        .feature-description {
+            font-size: 16px;
+            color: white;
+            line-height: 1.5;
+            margin: 0 0 10px 0;
+        }
+        
+        .enter-btn-container {
+            text-align: center;
+            margin-top: 40px;
+        }
+        
+        .enter-btn {
+            background: linear-gradient(135deg, #757575, #616161);
+            color: white;
+            border: none;
+            padding: 18px 50px;
+            border-radius: 30px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(117, 117, 117, 0.4);
+            transition: all 0.3s ease;
+        }
+        
+        .enter-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(117, 117, 117, 0.6);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>结直肠癌病理组织诊断辅助系统</h1>
+        </div>
+        
+        <div class="main-content">
+            <div class="left-content">
+                <div class="carousel">
+                    <div class="carousel-images">
+                        <div class="carousel-item">
+                            <img src="33.jpg">
+                        </div>
+                        <div class="carousel-item">
+                            <img src="55.jpg">
+                        </div>
+                        <div class="carousel-item">
+                            <img src="66.jpg">
+                        </div>
+                        <div class="carousel-item">
+                            <img src="77.jpg">
+                        </div>
+                        <div class="carousel-item">
+                            <img src="88.jpg">
+                        </div>
+                    </div>
+                    <div class="carousel-nav">
+                        <div class="carousel-dot active" data-index="0"></div>
+                        <div class="carousel-dot" data-index="1"></div>
+                        <div class="carousel-dot" data-index="2"></div>
+                        <div class="carousel-dot" data-index="3"></div>
+                        <div class="carousel-dot" data-index="4"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="right-content">
+                <div class="feature-card">
+                    <h3 class="feature-title">结直肠癌与病理诊断</h3>
+                    <p class="feature-description">结直肠癌是全球第三大常见癌症，早期诊断对提升生存率至关重要，早期患者5年生存率超90%，晚期仅约10%。
+                        病理诊断是确诊金标准，通过分析组织样本明确肿瘤类型、分级和分期，为治疗提供依据。
+                        结直肠癌病理组织含正常粘膜、肿瘤组织等多种类型，准确识别对评估肿瘤微环境和预后意义重大，本系统可自动分类这些组织类型，辅助病理学家诊断。</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="enter-btn-container">
+            <button class="enter-btn" onclick="window.location.href='system.html'">进入系统</button>
+        </div>
+    </div>
+    
+    <script>
+        // 轮播图功能
+        document.addEventListener('DOMContentLoaded', function() {
+            const carousel = document.querySelector('.carousel');
+            const carouselImages = document.querySelector('.carousel-images');
+            const carouselItems = document.querySelectorAll('.carousel-item');
+            const carouselDots = document.querySelectorAll('.carousel-dot');
+            
+            let currentIndex = 0;
+            const itemWidth = carouselItems[0].offsetWidth;
+            
+            // 自动轮播
+            function autoSlide() {
+                currentIndex = (currentIndex + 1) % carouselItems.length;
+                updateCarousel();
+            }
+            
+            // 更新轮播图状态
+            function updateCarousel() {
+                carouselImages.style.transform = `translateX(-${currentIndex * itemWidth}px)`;
+                
+                // 更新指示点
+                carouselDots.forEach((dot, index) => {
+                    if (index === currentIndex) {
+                        dot.classList.add('active');
+                    } else {
+                        dot.classList.remove('active');
+                    }
+                });
+            }
+            
+            // 点击指示点切换
+            carouselDots.forEach(dot => {
+                dot.addEventListener('click', function() {
+                    currentIndex = parseInt(this.getAttribute('data-index'));
+                    updateCarousel();
+                });
+            });
+            
+            // 启动自动轮播
+            setInterval(autoSlide, 3000);
+        });
+    </script>
+</body>
+</html>

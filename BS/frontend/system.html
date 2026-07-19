@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>病理组织诊断分类系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: "Microsoft YaHei", Arial, sans-serif;
+            background-color: #E3F2FD;
+            background-image: url('bg.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            z-index: -1;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .main-card {
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 8px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            padding: 30px;
+            text-align: center;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+        }
+        
+        .header h1 {
+            color: white;
+            font-size: 2em;
+            font-weight: bold;
+        }
+        
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            border-bottom: 1px solid #e8e8e8;
+            background: #fafafa;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .top-bar > div {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 16px;
+            color: #666;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .tab:hover {
+            color: #667eea;
+        }
+        
+        .tab.active {
+            color: #667eea;
+            border-bottom: 2px solid #667eea;
+        }
+        
+        .model-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .model-selector label {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .model-selector select {
+            padding: 8px 15px;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            background: white;
+        }
+        
+        .model-selector select:hover {
+            border-color: #667eea;
+        }
+        
+        .model-selector select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .upload-section {
+            text-align: center;
+            padding: 40px;
+            border: 2px dashed #E0E0E0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .upload-section:hover {
+            border-color: #667eea;
+            background: #f5f7fa;
+        }
+        
+        .upload-section.dragover {
+            border-color: #667eea;
+            background: #f0f7ff;
+        }
+        
+        .upload-icon {
+            font-size: 48px;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        
+        .upload-text {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .upload-info {
+            font-size: 14px;
+            color: #999;
+        }
+        
+        #file-input {
+            display: none;
+        }
+        
+        .preview-section {
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .preview-section.show {
+            display: block;
+        }
+        
+        .preview-image {
+            max-width: 300px;
+            max-height: 300px;
+            border-radius: 8px;
+            margin: 0 auto;
+            display: block;
+        }
+        
+        .classify-btn {
+            margin-top: 20px;
+            padding: 14px 32px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(102, 126, 234, 0.3), 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .classify-btn:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(102, 126, 234, 0.5);
+        }
+        
+        .classify-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .result-section {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 8px;
+            background: #f8f9fa;
+            display: none;
+        }
+        
+        .result-section.show {
+            display: block;
+        }
+        
+        .result-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .result-card {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .class-name {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #667eea;
+        }
+        
+        .confidence {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+        
+        .class-description {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e8f5e8;
+            border-radius: 6px;
+            color: #2e7d32;
+            text-align: left;
+            line-height: 1.6;
+        }
+        
+        .loading {
+            display: none;
+            margin: 20px 0;
+        }
+        
+        .loading.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error-message {
+            color: #d32f2f;
+            padding: 15px;
+            background: #ffebee;
+            border-radius: 6px;
+            margin-top: 15px;
+            display: none;
+        }
+        
+        .error-message.show {
+            display: block;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            display: flex;
+            align-items: flex-start;
+            gap: 30px;
+        }
+        
+        .main-card {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 8px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+            overflow: hidden;
+            min-width: 0;
+            min-width: 600px;
+        }
+        
+        .samples-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            min-width: 150px;
+        }
+        
+        .samples-column {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .sample-card {
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            max-width: 150px;
+        }
+        
+        .sample-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border-color: #667eea;
+        }
+        
+        .sample-card.selected {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+        
+        .sample-card img {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        
+        .sample-card span {
+            display: block;
+            font-size: 14px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .prediction-info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e3f2fd;
+            border-radius: 6px;
+            color: #1976d2;
+            font-size: 14px;
+        }
+        
+        .knowledge-base-section {
+            padding: 20px 0;
+        }
+        
+        .kb-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .kb-subtitle {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        .kb-selector {
+            margin-bottom: 30px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .kb-selector label {
+            font-size: 14px;
+            color: #333;
+        }
+        
+        .kb-selector select {
+            padding: 8px 15px;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            background: white;
+            min-width: 200px;
+        }
+        
+        .kb-selector select:hover {
+            border-color: #667eea;
+        }
+        
+        .kb-selector select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+        }
+        
+        .kb-btn {
+            padding: 8px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .kb-btn:hover {
+            background: #5a6fd8;
+        }
+        
+        .kb-card {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 4px solid #667eea;
+        }
+        
+        .kb-class-name {
+            font-size: 22px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .kb-section {
+            margin-bottom: 20px;
+        }
+        
+        .kb-section-title {
+            font-size: 15px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .kb-section-content {
+            font-size: 14px;
+            color: #333;
+            line-height: 1.8;
+            text-align: justify;
+        }
+        
+        .batch-section {
+            padding: 20px;
+            text-align: center;
+            color: #999;
+        }
+        
+        .batch-section h3 {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 左侧样本图片 -->
+        <div class="samples-container">
+            <div class="samples-column">
+                <div class="sample-card" data-sample="TUM-CAEETIYQ.jpg" title="肿瘤组织">
+                    <img src="TUM-CAEETIYQ.jpg" alt="肿瘤组织">
+                    <span>肿瘤组织</span>
+                </div>
+                <div class="sample-card" data-sample="NORM-CCPHAGYN.jpg" title="正常组织">
+                    <img src="NORM-CCPHAGYN.jpg" alt="正常组织">
+                    <span>正常组织</span>
+                </div>
+                <div class="sample-card" data-sample="STR-ADTTWYDY.jpg" title="间质组织">
+                    <img src="STR-ADTTWYDY.jpg" alt="间质组织">
+                    <span>间质组织</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="main-card">
+            <div class="header">
+                <h1>病理组织诊断分类系统</h1>
+            </div>
+            
+            <div class="top-bar">
+                <div class="tabs">
+                    <button class="tab active" data-tab="single">单图诊断</button>
+                    <button class="tab" data-tab="batch">多图诊断</button>
+                    <button class="tab" data-tab="knowledge">病理组织知识库</button>
+                </div>
+                
+                <div style="display: flex; align-items: center; gap: 20px;">
+                    <div class="model-selector">
+                        <label>选择模型：</label>
+                        <select id="model-select">
+                            <option value="mobilenetv3">MobileNetV3 (98.49%)</option>
+                            <option value="resnet50">ResNet50 (97.72%)</option>
+                            <option value="cnn_transformer">CNN+Transformer (94.24%)</option>
+                        </select>
+                    </div>
+                    
+                    <button style="
+                        background: linear-gradient(135deg, #757575, #616161);
+                        color: white;
+                        border: none;
+                        padding: 8px 16px;
+                        border-radius: 4px;
+                        font-size: 14px;
+                        cursor: pointer;
+                        transition: all 0.3s ease;
+                        box-shadow: 0 2px 6px rgba(117, 117, 117, 0.3);
+                    " onclick="window.location.href='index.html'">返回首页</button>
+                </div>
+            </div>
+            
+            <div class="content">
+                <div class="tab-content active" id="single-tab">
+                    <div class="batch-section">
+                        <h3>单图诊断功能</h3>
+                        <p>上传单张病理切片样本进行分析，支持JPG、PNG、TIF等格式</p>
+                        
+                        <div class="upload-section" id="upload-area" style="margin: 30px 0;">
+                            <div class="upload-icon">📁</div>
+                            <div class="upload-text">点击或拖拽切片样本到此处上传</div>
+                            <input type="file" id="file-input" accept="image/*">
+                        </div>
+                        
+                        <div style="text-align: center; margin: 20px 0;">
+                            <button class="classify-btn" id="classify-btn" style="pointer-events: none; opacity: 0.6;">开始分析</button>
+                        </div>
+                        
+                        <div class="preview-section" id="preview-section">
+                            <img id="preview-image" class="preview-image">
+                        </div>
+                        
+                        <div class="loading" id="loading">
+                            <div class="spinner"></div>
+                            <span>正在分析图片...</span>
+                        </div>
+                        
+                        <div class="error-message" id="error-message"></div>
+                        
+                        <div class="result-section" id="result-section">
+                            <div class="result-title">分类结果</div>
+                            <div class="result-card">
+                                <div class="class-name" id="class-name">加载中...</div>
+                                <div class="confidence" id="confidence"></div>
+                                <div class="class-description" id="class-description"></div>
+                            </div>
+                            <div class="prediction-info" id="prediction-info">
+                                <strong>模型信息：</strong> <span id="model-info">MobileNetV3 (准确率：98.49%)</span>
+                            </div>
+                            <button class="kb-btn" id="single-download-btn" style="margin-top: 20px; display: none;">下载分析结果</button>
+                        </div>
+                        
+
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="batch-tab">
+                    <div class="batch-section">
+                        <h3>多图诊断功能</h3>
+                        <p>上传多张切片样本进行批量分析，支持JPG、PNG、TIF等格式，单次最多10张图片</p>
+                        
+                        <div class="upload-section" id="batch-upload-area" style="margin: 30px 0;">
+                            <div class="upload-icon">📁</div>
+                            <div class="upload-text">点击或拖拽多张图片到此处上传</div>
+                            <input type="file" id="batch-file-input" accept="image/*" multiple style="display: none;">
+                        </div>
+                        
+                        <div id="batch-files-list" style="margin: 20px 0; display: none;">
+                            <h4 style="margin-bottom: 15px; color: #333;">已选择的文件：</h4>
+                            <ul id="files-list" style="list-style: none; padding: 0; max-height: 200px; overflow-y: auto;"></ul>
+                        </div>
+                        
+                        <button class="classify-btn" id="batch-classify-btn" style="margin: 20px 0; pointer-events: none; opacity: 0.6;">开始批量分析</button>
+                        
+                        <div class="loading" id="batch-loading" style="display: none; margin: 20px 0;">
+                            <div class="spinner"></div>
+                            <span>正在批量分析图片...</span>
+                        </div>
+                        
+                        <div class="error-message" id="batch-error-message" style="display: none;"></div>
+                        
+                        <div class="result-section" id="batch-result-section" style="display: none; margin-top: 30px;">
+                            <div class="result-title">批量分析结果</div>
+                            <div id="batch-results" style="margin-top: 20px;"></div>
+                            <button class="kb-btn" id="download-results-btn" style="margin-top: 20px;">下载分析结果</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="knowledge-tab">
+                    <div class="knowledge-base-section">
+                        <div class="kb-title">常见病理组织知识库</div>
+                        <div class="kb-subtitle">这里提供常见病理组织的详细信息，包括特征、识别要点和临床意义。</div>
+                        
+                        <div class="kb-selector">
+                            <label>选择组织类型：</label>
+                            <select id="kb-select">
+                                <option value="ADI">ADI - 脂肪组织</option>
+                                <option value="BACK">BACK - 背景</option>
+                                <option value="DEB">DEB - 坏死组织</option>
+                                <option value="LYM">LYM - 淋巴细胞</option>
+                                <option value="MUC">MUC - 粘液</option>
+                                <option value="MUS">MUS - 平滑肌</option>
+                                <option value="NORM">NORM - 正常粘膜</option>
+                                <option value="STR">STR - 间质</option>
+                                <option value="TUM">TUM - 肿瘤</option>
+                            </select>
+                            <button class="kb-btn" id="kb-btn">查看详情</button>
+                        </div>
+                        
+                        <div class="kb-card" id="kb-card">
+                            <div class="kb-class-name" id="kb-class-name">脂肪组织 (ADI)</div>
+                            
+                            <div class="kb-section">
+                                <div class="kb-section-title">组织说明：</div>
+                                <div class="kb-section-content" id="kb-desc">脂肪组织由脂肪细胞组成，通常呈黄色或白色，在病理切片中表现为较大的空泡状结构。</div>
+                            </div>
+                            
+                            <div class="kb-section">
+                                <div class="kb-section-title">临床意义：</div>
+                                <div class="kb-section-content" id="kb-clinical">脂肪组织在正常情况下主要起能量储存和保护作用。在病理切片中，脂肪组织的存在可能帮助判断组织的位置和状态。</div>
+                            </div>
+                            
+                            <div class="kb-section">
+                                <div class="kb-section-title">识别要点：</div>
+                                <div class="kb-section-content" id="kb-features">细胞呈大空泡状，细胞核被挤到边缘，细胞边界清晰。</div>
+                            </div>
+                            
+                            <div class="kb-section">
+                                <div class="kb-section-title">紧急度：</div>
+                                <div class="kb-section-content" id="kb-urgency">低（正常组织）</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 右侧样本图片 -->
+        <div class="samples-container">
+            <div class="samples-column">
+                <div class="sample-card" data-sample="LYM-AQRVHASR.jpg" title="淋巴细胞">
+                    <img src="LYM-AQRVHASR.jpg" alt="淋巴细胞">
+                    <span>淋巴细胞</span>
+                </div>
+                <div class="sample-card" data-sample="DEB-CVVSAMWM.jpg" title="坏死组织">
+                    <img src="DEB-CVVSAMWM.jpg" alt="坏死组织">
+                    <span>坏死组织</span>
+                </div>
+                <div class="sample-card" data-sample="ADI-APIPDEPR.jpg" title="脂肪组织">
+                    <img src="ADI-APIPDEPR.jpg" alt="脂肪组织">
+                    <span>脂肪组织</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const classDescriptions = {
+            "ADI": {
+                name: "脂肪组织",
+                desc: "由脂肪细胞组成，通常呈黄色或白色，在病理切片中表现为较大的空泡状结构。",
+                clinical: "脂肪组织在正常情况下主要起能量储存和保护作用。在病理切片中，脂肪组织的存在可能帮助判断组织的位置和状态。",
+                features: "细胞呈大空泡状，细胞核被挤到边缘，细胞边界清晰。",
+                urgency: "低（正常组织）"
+            },
+            "BACK": {
+                name: "背景",
+                desc: "非组织区域，可能包含载玻片背景或扫描伪影。",
+                clinical: "背景区域不包含有用的病理信息，在分析时需要排除。",
+                features: "无细胞结构，可能包含载玻片的空白区域或扫描产生的伪影。",
+                urgency: "无（非组织区域）"
+            },
+            "DEB": {
+                name: "坏死组织",
+                desc: "细胞死亡后形成的组织，通常表现为嗜酸性、无结构的区域。",
+                clinical: "坏死组织的存在提示组织损伤或疾病进展，需要进一步评估其原因和范围。",
+                features: "细胞核固缩、碎裂或消失，细胞质嗜酸性增强，组织结构模糊。",
+                urgency: "中（需要关注）"
+            },
+            "LYM": {
+                name: "淋巴细胞",
+                desc: "免疫系统的重要组成部分，在病理切片中表现为小而圆的蓝色核。",
+                clinical: "淋巴细胞浸润通常提示免疫反应或炎症，在肿瘤微环境中具有重要的预后意义。",
+                features: "细胞小而圆，细胞核深染，细胞质少，常聚集分布。",
+                urgency: "中（需要评估）"
+            },
+            "MUC": {
+                name: "粘液",
+                desc: "由上皮细胞分泌的粘稠物质，在病理切片中呈淡蓝色或粉红色。",
+                clinical: "粘液的产生和分布在某些肿瘤（如粘液腺癌）中具有诊断和预后价值。",
+                features: "无定形、嗜碱性或嗜酸性物质，可填充腺腔或围绕细胞。",
+                urgency: "中（需要评估）"
+            },
+            "MUS": {
+                name: "平滑肌",
+                desc: "非横纹肌组织，在病理切片中表现为长梭形细胞。",
+                clinical: "平滑肌是许多器官的重要组成部分，其增生或肿瘤性改变具有重要临床意义。",
+                features: "细胞呈长梭形，细胞核呈杆状，两端钝圆，细胞质嗜酸性。",
+                urgency: "低（正常组织）"
+            },
+            "NORM": {
+                name: "正常粘膜",
+                desc: "健康的肠道粘膜组织，具有完整的腺体结构。",
+                clinical: "正常粘膜作为对照，帮助识别病变区域的形态学改变。",
+                features: "腺体结构规则，上皮细胞排列整齐，无明显异型性。",
+                urgency: "低（正常组织）"
+            },
+            "STR": {
+                name: "间质",
+                desc: "支持组织，包括纤维结缔组织、血管等。",
+                clinical: "间质的改变（如纤维化、炎症细胞浸润）在许多疾病中具有重要意义。",
+                features: "包含成纤维细胞、胶原纤维、血管等，结构疏松或致密。",
+                urgency: "中（需要评估）"
+            },
+            "TUM": {
+                name: "肿瘤",
+                desc: "异常增生的细胞团，可能表现为细胞异形性和核分裂增多。",
+                clinical: "肿瘤组织的识别和分类是病理诊断的核心，直接影响治疗方案和预后判断。",
+                features: "细胞大小不一，核浆比例增高，核仁明显，核分裂象增多，排列紊乱。",
+                urgency: "高（需要重点关注）"
+            }
+        };
+
+        const modelInfo = {
+            "mobilenetv3": {
+                name: "MobileNetV3",
+                accuracy: "98.49%"
+            },
+            "resnet50": {
+                name: "ResNet50",
+                accuracy: "97.72%"
+            },
+            "cnn_transformer": {
+                name: "CNN+Transformer",
+                accuracy: "94.24%"
+            }
+        };
+
+        let selectedModel = "mobilenetv3";
+        let uploadedFile = null;
+        let singleResult = null;
+
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                document.getElementById(this.dataset.tab + '-tab').classList.add('active');
+            });
+        });
+
+        document.getElementById('model-select').addEventListener('change', function() {
+            selectedModel = this.value;
+            document.getElementById('model-info').textContent = 
+                `${modelInfo[selectedModel].name} (准确率：${modelInfo[selectedModel].accuracy})`;
+        });
+
+        const uploadArea = document.getElementById('upload-area');
+        const fileInput = document.getElementById('file-input');
+        const previewSection = document.getElementById('preview-section');
+        const previewImage = document.getElementById('preview-image');
+        const classifyBtn = document.getElementById('classify-btn');
+        const loading = document.getElementById('loading');
+        const resultSection = document.getElementById('result-section');
+        const errorMessage = document.getElementById('error-message');
+
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        function handleFile(file) {
+            if (file.size > 5 * 1024 * 1024) {
+                alert('文件太大，请上传小于5MB的图片');
+                return;
+            }
+            
+            uploadedFile = file;
+            const fileName = file.name.toLowerCase();
+            const isTif = fileName.endsWith('.tif') || fileName.endsWith('.tiff');
+            
+            previewSection.classList.add('show');
+            resultSection.classList.remove('show');
+            errorMessage.classList.remove('show');
+            
+            // 启用开始分析按钮
+            const classifyBtn = document.getElementById('classify-btn');
+            classifyBtn.style.pointerEvents = 'auto';
+            classifyBtn.style.opacity = '1';
+            
+            if (isTif) {
+                previewImage.style.display = 'none';
+                let tifPlaceholder = document.getElementById('tif-placeholder');
+                if (!tifPlaceholder) {
+                    tifPlaceholder = document.createElement('div');
+                    tifPlaceholder.id = 'tif-placeholder';
+                    tifPlaceholder.style.cssText = `
+                        padding: 40px;
+                        background: #f5f7fa;
+                        border: 2px dashed #667eea;
+                        border-radius: 8px;
+                        text-align: center;
+                        max-width: 300px;
+                        margin: 0 auto;
+                    `;
+                    tifPlaceholder.innerHTML = `
+                        <div style="font-size: 48px; margin-bottom: 15px;">📄</div>
+                        <div style="font-size: 16px; color: #333; margin-bottom: 10px;">TIF/TIFF 格式图片</div>
+                        <div style="font-size: 14px; color: #666;">${file.name}</div>
+                        <div style="font-size: 12px; color: #999; margin-top: 10px;">浏览器不支持直接预览，但可以正常分析</div>
+                    `;
+                    previewImage.parentNode.insertBefore(tifPlaceholder, previewImage);
+                } else {
+                    tifPlaceholder.style.display = 'block';
+                }
+            } else {
+                const existingPlaceholder = document.getElementById('tif-placeholder');
+                if (existingPlaceholder) {
+                    existingPlaceholder.style.display = 'none';
+                }
+                previewImage.style.display = 'block';
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    previewImage.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        classifyBtn.addEventListener('click', () => {
+            if (uploadedFile) {
+                classifyImage(uploadedFile);
+            }
+        });
+
+        async function classifyImage(file) {
+            loading.classList.add('show');
+            resultSection.classList.remove('show');
+            errorMessage.classList.remove('show');
+            classifyBtn.disabled = true;
+            document.getElementById('single-download-btn').style.display = 'none';
+            
+            try {
+                const formData = new FormData();
+                formData.append('image', file);
+                formData.append('model', selectedModel);
+                
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                
+                // 保存分析结果
+                singleResult = {
+                    序号: 1,
+                    文件名: file.name,
+                    分类结果: `${classDescriptions[result.class_name].name} (${result.class_name})`,
+                    置信度: `置信度：${(result.confidence * 100).toFixed(2)}%`,
+                    描述: classDescriptions[result.class_name].desc,
+                    模型: `${modelInfo[selectedModel].name} (准确率：${modelInfo[selectedModel].accuracy})`
+                };
+                
+                loading.classList.remove('show');
+                resultSection.classList.add('show');
+                
+                document.getElementById('class-name').textContent = 
+                    `${classDescriptions[result.class_name].name} (${result.class_name})`;
+                document.getElementById('confidence').textContent = 
+                    `置信度：${(result.confidence * 100).toFixed(2)}%`;
+                document.getElementById('class-description').textContent = 
+                    classDescriptions[result.class_name].desc;
+                
+                // 显示下载按钮
+                document.getElementById('single-download-btn').style.display = 'inline-block';
+                
+            } catch (error) {
+                loading.classList.remove('show');
+                errorMessage.textContent = `错误：${error.message}`;
+                errorMessage.classList.add('show');
+                console.error('分类失败：', error);
+            } finally {
+                classifyBtn.disabled = false;
+            }
+        }
+
+        const kbSelect = document.getElementById('kb-select');
+        const kbBtn = document.getElementById('kb-btn');
+        
+        kbBtn.addEventListener('click', () => {
+            updateKnowledgeBase(kbSelect.value);
+        });
+
+        kbSelect.addEventListener('change', () => {
+            updateKnowledgeBase(kbSelect.value);
+        });
+
+        function updateKnowledgeBase(classId) {
+            const data = classDescriptions[classId];
+            document.getElementById('kb-class-name').textContent = `${data.name} (${classId})`;
+            document.getElementById('kb-desc').textContent = data.desc;
+            document.getElementById('kb-clinical').textContent = data.clinical;
+            document.getElementById('kb-features').textContent = data.features;
+            document.getElementById('kb-urgency').textContent = data.urgency;
+        }
+
+        // 批量诊断功能
+        let batchFiles = [];
+        
+        const batchUploadArea = document.getElementById('batch-upload-area');
+        const batchFileInput = document.getElementById('batch-file-input');
+        const batchFilesList = document.getElementById('batch-files-list');
+        const filesList = document.getElementById('files-list');
+        const batchClassifyBtn = document.getElementById('batch-classify-btn');
+        const batchLoading = document.getElementById('batch-loading');
+        const batchError = document.getElementById('batch-error-message');
+        const batchResultSection = document.getElementById('batch-result-section');
+        const batchResults = document.getElementById('batch-results');
+        const downloadResultsBtn = document.getElementById('download-results-btn');
+        
+        batchUploadArea.addEventListener('click', () => batchFileInput.click());
+        
+        batchUploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            batchUploadArea.classList.add('dragover');
+        });
+        
+        batchUploadArea.addEventListener('dragleave', () => {
+            batchUploadArea.classList.remove('dragover');
+        });
+        
+        batchUploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            batchUploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleBatchFiles(Array.from(files));
+            }
+        });
+        
+        batchFileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleBatchFiles(Array.from(e.target.files));
+            }
+        });
+        
+        function handleBatchFiles(files) {
+            // 检查总文件数
+            const totalFiles = batchFiles.length + files.length;
+            if (totalFiles > 10) {
+                alert('单次最多上传10张图片，已选择' + batchFiles.length + '张，还可添加' + (10 - batchFiles.length) + '张');
+                return;
+            }
+            
+            // 追加文件而不是覆盖
+            batchFiles = [...batchFiles, ...files];
+            updateFilesList();
+        }
+        
+        function updateFilesList() {
+            filesList.innerHTML = '';
+            batchFiles.forEach((file, index) => {
+                const li = document.createElement('li');
+                li.style.cssText = `
+                    padding: 8px 12px;
+                    background: #f8f9fa;
+                    border-radius: 4px;
+                    margin-bottom: 8px;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                `;
+                
+                const fileName = file.name;
+                const fileSize = (file.size / 1024).toFixed(2) + ' KB';
+                
+                li.innerHTML = `
+                    <span>${index + 1}. ${fileName} (${fileSize})</span>
+                    <button style="
+                        background: #f44336;
+                        color: white;
+                        border: none;
+                        border-radius: 4px;
+                        padding: 4px 8px;
+                        cursor: pointer;
+                        font-size: 12px;
+                    " onclick="removeBatchFile(${index})">删除</button>
+                `;
+                filesList.appendChild(li);
+            });
+            
+            if (batchFiles.length > 0) {
+                batchFilesList.style.display = 'block';
+                // 启用批量分析按钮
+                const batchClassifyBtn = document.getElementById('batch-classify-btn');
+                batchClassifyBtn.style.pointerEvents = 'auto';
+                batchClassifyBtn.style.opacity = '1';
+            } else {
+                batchFilesList.style.display = 'none';
+                // 禁用批量分析按钮
+                const batchClassifyBtn = document.getElementById('batch-classify-btn');
+                batchClassifyBtn.style.pointerEvents = 'none';
+                batchClassifyBtn.style.opacity = '0.6';
+            }
+        }
+        
+        function removeBatchFile(index) {
+            batchFiles.splice(index, 1);
+            updateFilesList();
+        }
+        
+        batchClassifyBtn.addEventListener('click', async () => {
+            batchLoading.style.display = 'flex';
+            batchError.style.display = 'none';
+            batchResultSection.style.display = 'none';
+            batchClassifyBtn.disabled = true;
+            
+            try {
+                const results = [];
+                
+                for (let i = 0; i < batchFiles.length; i++) {
+                    const file = batchFiles[i];
+                    const formData = new FormData();
+                    formData.append('image', file);
+                    formData.append('model', selectedModel);
+                    
+                    const response = await fetch('/predict', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`分析失败: ${response.status}`);
+                    }
+                    
+                    const result = await response.json();
+                    results.push({
+                        fileName: file.name,
+                        ...result
+                    });
+                }
+                
+                batchLoading.style.display = 'none';
+                displayBatchResults(results);
+                batchResultSection.style.display = 'block';
+                
+            } catch (error) {
+                batchLoading.style.display = 'none';
+                batchError.textContent = `错误: ${error.message}`;
+                batchError.style.display = 'block';
+                console.error('批量分析失败:', error);
+            } finally {
+                batchClassifyBtn.disabled = false;
+            }
+        });
+        
+        function displayBatchResults(results) {
+            batchResults.innerHTML = '';
+            
+            results.forEach((result, index) => {
+                const resultCard = document.createElement('div');
+                resultCard.style.cssText = `
+                    background: white;
+                    padding: 20px;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                    margin-bottom: 20px;
+                    border-left: 4px solid #667eea;
+                `;
+                
+                const className = classDescriptions[result.class_name]?.name || result.class_name;
+                const confidence = (result.confidence * 100).toFixed(2);
+                
+                resultCard.innerHTML = `
+                    <h4 style="margin-bottom: 10px; color: #333;">${index + 1}. ${result.fileName}</h4>
+                    <div style="font-size: 18px; font-weight: bold; color: #667eea; margin-bottom: 5px;">
+                        ${className} (${result.class_name})
+                    </div>
+                    <div style="color: #666; margin-bottom: 10px;">
+                        置信度: ${confidence}%
+                    </div>
+                    <div style="
+                        padding: 10px;
+                        background: #e8f5e8;
+                        border-radius: 4px;
+                        color: #2e7d32;
+                        font-size: 14px;
+                        line-height: 1.5;
+                    ">
+                        ${classDescriptions[result.class_name]?.desc || '暂无描述'}
+                    </div>
+                `;
+                
+                batchResults.appendChild(resultCard);
+            });
+        }
+        
+        downloadResultsBtn.addEventListener('click', () => {
+            try {
+                const results = [];
+                // 选择所有结果卡片
+                const resultCards = document.querySelectorAll('#batch-results > div');
+                
+                console.log('找到的结果卡片数量:', resultCards.length);
+                
+                resultCards.forEach((card, index) => {
+                    const h4 = card.querySelector('h4');
+                    if (h4) {
+                        const fileName = h4.textContent.split('. ')[1];
+                        const className = card.querySelector('div:nth-child(2)')?.textContent || '';
+                        const confidence = card.querySelector('div:nth-child(3)')?.textContent || '';
+                        const description = card.querySelector('div:nth-child(4)')?.textContent || '';
+                        
+                        console.log('处理卡片:', index + 1, fileName);
+                        
+                        results.push({
+                            序号: index + 1,
+                            文件名: fileName,
+                            分类结果: className,
+                            置信度: confidence,
+                            描述: description
+                        });
+                    }
+                });
+                
+                console.log('生成的结果数据:', results);
+                
+                if (results.length === 0) {
+                    alert('没有可下载的分析结果');
+                    return;
+                }
+                
+                const csvContent = generateCSV(results);
+                console.log('生成的CSV内容:', csvContent);
+                
+                downloadCSV(csvContent, '批量分析结果.csv');
+            } catch (error) {
+                console.error('下载失败:', error);
+                alert('下载失败，请重试: ' + error.message);
+            }
+        });
+        
+        function generateCSV(data) {
+            if (!data || data.length === 0) {
+                return '';
+            }
+            
+            const headers = Object.keys(data[0]);
+            const rows = data.map(row => {
+                return headers.map(field => {
+                    const value = row[field] || '';
+                    return `"${String(value).replace(/"/g, '""')}"`;
+                }).join(',');
+            });
+            
+            const csv = [headers.join(','), ...rows].join('\n');
+            return csv;
+        }
+        
+        function downloadCSV(content, filename) {
+            console.log('开始下载CSV文件:', filename);
+            console.log('CSV内容长度:', content.length);
+            
+            try {
+                const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                
+                link.href = url;
+                link.download = filename;
+                link.style.display = 'none';
+                
+                document.body.appendChild(link);
+                console.log('创建下载链接成功');
+                
+                // 使用鼠标事件模拟点击
+                const event = new MouseEvent('click', {
+                    view: window,
+                    bubbles: true,
+                    cancelable: true
+                });
+                link.dispatchEvent(event);
+                
+                console.log('触发点击事件');
+                
+                // 延迟清理，确保下载完成
+                setTimeout(() => {
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(url);
+                    console.log('清理下载链接');
+                }, 100);
+                
+                console.log('下载完成');
+            } catch (error) {
+                console.error('下载CSV失败:', error);
+                throw error;
+            }
+        }
+        
+        // 单图诊断下载按钮
+        document.getElementById('single-download-btn').addEventListener('click', () => {
+            try {
+                if (!singleResult) {
+                    alert('没有可下载的分析结果');
+                    return;
+                }
+                
+                const results = [singleResult];
+                const csvContent = generateCSV(results);
+                const fileName = singleResult.文件名.split('.')[0] + '_分析结果.csv';
+                downloadCSV(csvContent, fileName);
+            } catch (error) {
+                console.error('下载失败:', error);
+                alert('下载失败，请重试: ' + error.message);
+            }
+        });
+        
+        // 样本图片点击事件
+        document.querySelectorAll('.sample-card').forEach(item => {
+            item.addEventListener('click', function() {
+                // 检查当前是否在多图诊断标签页
+                const activeTab = document.querySelector('.tab.active');
+                const isBatchTab = activeTab && activeTab.dataset.tab === 'batch';
+                
+                if (isBatchTab) {
+                    // 多图诊断模式：支持多选
+                    this.classList.toggle('selected');
+                    
+                    // 获取所有选中的样本
+                    const selectedSamples = document.querySelectorAll('.sample-card.selected');
+                    
+                    // 处理批量添加
+                    if (selectedSamples.length > 0) {
+                        selectedSamples.forEach(sampleCard => {
+                            const samplePath = sampleCard.getAttribute('data-sample');
+                            const fileName = samplePath.split('/').pop();
+                            const fileType = 'image/' + fileName.split('.').pop();
+                            
+                            // 检查是否已经添加过
+                            const alreadyAdded = batchFiles.some(file => file.name === fileName);
+                            if (!alreadyAdded) {
+                                // 创建一个假的File对象
+                                fetch(samplePath)
+                                    .then(response => response.blob())
+                                    .then(blob => {
+                                        const file = new File([blob], fileName, { type: fileType });
+                                        batchFiles.push(file);
+                                        updateFilesList();
+                                    })
+                                    .catch(error => {
+                                        console.error('加载样本图片失败:', error);
+                                        alert('加载样本图片失败，请重试');
+                                    });
+                            }
+                        });
+                    }
+                } else {
+                    // 单图诊断模式：单选
+                    // 移除其他样本的选中状态
+                    document.querySelectorAll('.sample-card').forEach(sample => {
+                        sample.classList.remove('selected');
+                    });
+                    
+                    // 添加当前样本的选中状态
+                    this.classList.add('selected');
+                    
+                    const samplePath = this.getAttribute('data-sample');
+                    const sampleName = this.querySelector('span').textContent;
+                    
+                    // 提取文件名
+                    const fileName = samplePath.split('/').pop();
+                    const fileType = 'image/' + fileName.split('.').pop();
+                    
+                    // 创建一个假的File对象
+                    fetch(samplePath)
+                        .then(response => response.blob())
+                        .then(blob => {
+                            const file = new File([blob], fileName, { type: fileType });
+                            handleFile(file);
+                        })
+                        .catch(error => {
+                            console.error('加载样本图片失败:', error);
+                            alert('加载样本图片失败，请重试');
+                        });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
